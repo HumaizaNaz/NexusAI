@@ -2,7 +2,6 @@
 
 import { AssistantRuntimeProvider } from "@assistant-ui/react"
 import { useChatRuntime } from "@assistant-ui/react-ai-sdk"
-import { Thread } from "@/components/assistant-ui/thread"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/app/app-sidebar"
 import {
@@ -16,39 +15,38 @@ import {
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Plus, RotateCcw, Zap } from "lucide-react"
-import { useState } from "react"
+import { useState, useCallback } from "react"
+import { Thread } from "@/components/assistant-ui/thread"
 
 export default function ChatPage() {
+  const [isLoading, setIsLoading] = useState(false)
+
+  // Create a runtime instance
   const runtime = useChatRuntime({
     api: "/api/chat",
   })
 
-  // Add state to track if we're in a loading state
-  const [isLoading, setIsLoading] = useState(false)
-
-  const handleNewChat = () => {
+  const handleResetChat = useCallback(() => {
+    console.log("Reset button clicked") // Debug log
     setIsLoading(true)
-    try {
-      runtime.reset?.()
-      console.log("Starting new chat...")
-    } catch (error) {
-      console.error("Error starting new chat:", error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
-  const handleClearChat = () => {
-    setIsLoading(true)
     try {
-      runtime.reset?.()
-      console.log("Clearing chat...")
+      // Use the window method to reset the thread
+      if (typeof window !== "undefined" && window.resetThread) {
+        console.log("Calling window.resetThread") // Debug log
+        window.resetThread()
+      } else {
+        console.warn("window.resetThread not available") // Debug log
+      }
     } catch (error) {
-      console.error("Error clearing chat:", error)
-    } finally {
-      setIsLoading(false)
+      console.error("Error resetting chat:", error)
     }
-  }
+
+    // Small delay to ensure the UI updates
+    setTimeout(() => {
+      setIsLoading(false)
+    }, 300)
+  }, [])
 
   return (
     <AssistantRuntimeProvider runtime={runtime}>
@@ -79,7 +77,7 @@ export default function ChatPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleClearChat}
+                onClick={handleResetChat}
                 disabled={isLoading}
                 className="border-orange-200 text-orange-600 hover:bg-orange-50"
               >
@@ -89,7 +87,7 @@ export default function ChatPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleNewChat}
+                onClick={handleResetChat}
                 disabled={isLoading}
                 className="bg-gradient-to-r from-violet-500 to-blue-500 text-white border-0 hover:from-violet-600 hover:to-blue-600 shadow-lg hover:shadow-xl transition-all duration-300"
               >

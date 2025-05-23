@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { AssistantRuntimeProvider } from "@assistant-ui/react"
@@ -36,16 +37,16 @@ import { useState } from "react"
 export const Assistant = () => {
   const router = useRouter()
   const [activePage, setActivePage] = useState("chat")
+  const [isLoading, setIsLoading] = useState(false)
 
   const runtime = useChatRuntime({
     api: "/api/chat",
   })
 
-  // Function to handle navigation
+  // Navigation handler (unchanged)
   const handleNavigation = (page: string) => {
     setActivePage(page)
 
-    // Navigate to the appropriate route
     switch (page) {
       case "home":
         router.push("/")
@@ -64,16 +65,32 @@ export const Assistant = () => {
     }
   }
 
-  // Function to handle logout
+  // Logout handler (unchanged)
   const handleLogout = () => {
     console.log("Logging out...")
     router.push("/login")
   }
 
-  // Function to start a new chat
+  // Updated handleNewChat with loading state and window/runtime methods
   const handleNewChat = () => {
-    runtime.reset?.()
-    console.log("Starting new chat...")
+    setIsLoading(true)
+    try {
+      // Use the global window method if defined
+      if (typeof window !== "undefined" && (window as any).resetThread) {
+        (window as any).resetThread()
+      }
+
+      // Use runtime method if available (casting to any to avoid TS errors)
+      if ((runtime as any).createThread) {
+        (runtime as any).createThread()
+      }
+
+      console.log("Starting new chat...")
+    } catch (error) {
+      console.error("Error starting new chat:", error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -186,10 +203,11 @@ export const Assistant = () => {
                 variant="outline"
                 size="sm"
                 onClick={handleNewChat}
-                className="bg-gradient-to-r from-purple-500 to-blue-500 text-white border-0 hover:from-purple-600 hover:to-blue-600"
+                disabled={isLoading}
+                className="bg-gradient-to-r from-purple-500 to-blue-500 text-white border-0 hover:from-purple-600 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Sparkles className="h-4 w-4 mr-2" />
-                New Chat
+                {isLoading ? "Starting..." : "New Chat"}
               </Button>
             </div>
           </header>
