@@ -222,7 +222,7 @@ export default function SettingsPage() {
                     </div>
                     Notifications
                   </CardTitle>
-                  <CardDescription>Manage your notification preferences and alerts.</CardDescription>
+                  <CardDescription>Manage your notification preferences and alerts .</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50">
@@ -246,7 +246,8 @@ export default function SettingsPage() {
                   size="lg"
                 >
                   <Save className="h-4 w-4" />
-                  Save Changes
+                  Save Change
+                
                 </Button>
               </div>
             </div>
